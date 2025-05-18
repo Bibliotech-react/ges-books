@@ -70,8 +70,6 @@ const Navigation = () => {
 
                 <Dropdown.Menu>
                   <Dropdown.Item as={Link} to="/profile">My Profile</Dropdown.Item>
-                  <Dropdown.Item as={Link} to="/books/reading">My Books</Dropdown.Item>
-                  <Dropdown.Item as={Link} to="/settings">Settings</Dropdown.Item>
                   <Dropdown.Divider />
                   <Dropdown.Item onClick={handleLogout}>Log Out</Dropdown.Item>
                 </Dropdown.Menu>
@@ -83,6 +81,8 @@ const Navigation = () => {
               <Button as={Link} to="/signup" variant="primary">Sign Up</Button>
             </div>
           )}
+
+          
         </Navbar.Collapse>
       </Container>
     </Navbar>

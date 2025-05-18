@@ -27,9 +27,6 @@ const Footer = () => {
             <ul className="list-unstyled">
               <li className="mb-2"><Link to="/books" className="text-decoration-none text-muted">Browse Books</Link></li>
               <li className="mb-2"><Link to="/authors" className="text-decoration-none text-muted">Authors</Link></li>
-              <li className="mb-2"><Link to="/genres" className="text-decoration-none text-muted">Genres</Link></li>
-              <li className="mb-2"><Link to="/new-releases" className="text-decoration-none text-muted">New Releases</Link></li>
-              <li className="mb-2"><Link to="/popular" className="text-decoration-none text-muted">Popular</Link></li>
             </ul>
           </Col>
           
@@ -38,8 +35,6 @@ const Footer = () => {
             <ul className="list-unstyled">
               <li className="mb-2"><Link to="/forum" className="text-decoration-none text-muted">Forum</Link></li>
               <li className="mb-2"><Link to="/reviews" className="text-decoration-none text-muted">Reviews</Link></li>
-              <li className="mb-2"><Link to="/events" className="text-decoration-none text-muted">Events</Link></li>
-              <li className="mb-2"><Link to="/book-clubs" className="text-decoration-none text-muted">Book Clubs</Link></li>
             </ul>
           </Col>
           
@@ -48,7 +43,6 @@ const Footer = () => {
             <ul className="list-unstyled">
               <li className="mb-2"><Link to="/profile" className="text-decoration-none text-muted">My Profile</Link></li>
               <li className="mb-2"><Link to="/dashboard" className="text-decoration-none text-muted">Dashboard</Link></li>
-              <li className="mb-2"><Link to="/books/reading" className="text-decoration-none text-muted">My Books</Link></li>
               <li className="mb-2"><Link to="/books/wishlist" className="text-decoration-none text-muted">Wishlist</Link></li>
             </ul>
           </Col>
@@ -57,10 +51,6 @@ const Footer = () => {
             <h6 className="fw-bold mb-3">Help</h6>
             <ul className="list-unstyled">
               <li className="mb-2"><Link to="/support" className="text-decoration-none text-muted">Support</Link></li>
-              <li className="mb-2"><Link to="/faq" className="text-decoration-none text-muted">FAQ</Link></li>
-              <li className="mb-2"><Link to="/contact" className="text-decoration-none text-muted">Contact Us</Link></li>
-              <li className="mb-2"><Link to="/privacy" className="text-decoration-none text-muted">Privacy Policy</Link></li>
-              <li className="mb-2"><Link to="/terms" className="text-decoration-none text-muted">Terms of Service</Link></li>
             </ul>
           </Col>
         </Row>

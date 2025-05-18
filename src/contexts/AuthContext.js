@@ -1,102 +1,233 @@
 import React, { createContext, useState, useContext, useEffect } from 'react';
 
+// 1. First create the context
 const AuthContext = createContext();
 
-export function useAuth() {
-  return useContext(AuthContext);
-}
-
-export function AuthProvider({ children }) {
-  const [currentUser, setCurrentUser] = useState(null);
+// 2. Define the provider component
+export const AuthProvider = ({ children }) => {
+  const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
-  // Check if user is logged in on initial load
+  // Mock database for demo purposes
+  const mockDatabase = {
+    users: [
+      {
+        id: '1',
+        email: 'admin@bibliotech.com',
+        password: 'admin123',
+        firstName: 'Admin',
+        lastName: 'System',
+        role: 'admin',
+        token: 'admin-token'
+      },
+      {
+        id: '2',
+        email: 'john.doe@email.com',
+        password: 'user123',
+        firstName: 'John',
+        lastName: 'Doe',
+        role: 'user',
+        readingProgress: 35,
+        books: ['book1', 'book3'],
+        token: 'user-token'
+      }
+    ],
+    books: [
+      { id: 'book1', title: 'Book One', author: 'Author A' },
+      { id: 'book2', title: 'Book Two', author: 'Author B' },
+      { id: 'book3', title: 'Book Three', author: 'Author C' }
+    ]
+  };
+
   useEffect(() => {
-    const user = localStorage.getItem('user');
-    if (user) {
-      setCurrentUser(JSON.parse(user));
+    const storedUser = localStorage.getItem('user');
+    if (storedUser) {
+      setUser(JSON.parse(storedUser));
     }
     setLoading(false);
   }, []);
 
-  // Login function
   const login = async (email, password) => {
     try {
-      // In a real app, make API call to authenticate user
-      // const response = await axios.post('/api/users/login', { email, password });
+      setLoading(true);
+      setError(null);
       
-      // For now, simulate successful login with mock data
-      const userData = {
-        id: '1',
-        email,
-        firstName: 'John',
-        lastName: 'Doe',
-        token: 'sample-token-' + Math.random().toString(36).substring(2)
-      };
-      
+      const foundUser = mockDatabase.users.find(u => 
+        u.email === email && u.password === password
+      );
+
+      if (!foundUser) {
+        throw new Error('Invalid email or password');
+      }
+
+      const { password: _, ...userData } = foundUser;
       localStorage.setItem('user', JSON.stringify(userData));
-      setCurrentUser(userData);
+      setUser(userData);
       
-      return { success: true };
+      return { success: true, user: userData };
     } catch (error) {
-      return {
-        success: false,
-        error: error.response?.data?.message || 'Failed to login'
-      };
+      setError(error.message);
+      return { success: false, error: error.message };
+    } finally {
+      setLoading(false);
     }
   };
 
-  // Register function
   const register = async (userData) => {
     try {
-      // In a real app, make API call to register user
-      // const response = await axios.post('/api/users/register', userData);
+      setLoading(true);
+      setError(null);
       
-      // For now, simulate successful registration
-      return { success: true };
-    } catch (error) {
-      return {
-        success: false,
-        error: error.response?.data?.message || 'Failed to register'
+      const emailExists = mockDatabase.users.some(u => u.email === userData.email);
+      if (emailExists) {
+        throw new Error('Email already registered');
+      }
+
+      const newUser = {
+        id: Date.now().toString(),
+        ...userData,
+        role: 'user',
+        readingProgress: 0,
+        books: [],
+        token: `user-token-${Date.now()}`
       };
+
+      mockDatabase.users.push(newUser);
+      
+      const { password: _, ...userWithoutPassword } = newUser;
+      localStorage.setItem('user', JSON.stringify(userWithoutPassword));
+      setUser(userWithoutPassword);
+      
+      return { success: true, user: userWithoutPassword };
+    } catch (error) {
+      setError(error.message);
+      return { success: false, error: error.message };
+    } finally {
+      setLoading(false);
     }
   };
 
-  // Logout function
   const logout = () => {
     localStorage.removeItem('user');
-    setCurrentUser(null);
+    setUser(null);
+    setError(null);
   };
 
-  // Update user profile
-  const updateProfile = async (profileData) => {
-    try {
-      // In a real app, make API call to update user profile
-      // const response = await axios.put('/api/users/profile', profileData, {
-      //   headers: { Authorization: `Bearer ${currentUser.token}` }
-      // });
-      
-      // For now, simulate successful profile update
-      const updatedUser = { ...currentUser, ...profileData };
-      localStorage.setItem('user', JSON.stringify(updatedUser));
-      setCurrentUser(updatedUser);
-      
-      return { success: true };
-    } catch (error) {
-      return {
-        success: false,
-        error: error.response?.data?.message || 'Failed to update profile'
-      };
+  // ADMIN FUNCTIONS
+  const getAllUsers = () => {
+    if (!user || user.role !== 'admin') {
+      throw new Error('Unauthorized');
     }
+    return mockDatabase.users.map(u => {
+      const { password, token, ...safeUser } = u;
+      return safeUser;
+    });
+  };
+
+  const updateUserRole = (userId, newRole) => {
+    if (!user || user.role !== 'admin') {
+      throw new Error('Unauthorized');
+    }
+    const userToUpdate = mockDatabase.users.find(u => u.id === userId);
+    if (userToUpdate) {
+      userToUpdate.role = newRole;
+      return { success: true };
+    }
+    return { success: false, error: 'User not found' };
+  };
+
+  const deleteUser = (userId) => {
+    if (!user || user.role !== 'admin') {
+      throw new Error('Unauthorized');
+    }
+    const index = mockDatabase.users.findIndex(u => u.id === userId);
+    if (index !== -1) {
+      mockDatabase.users.splice(index, 1);
+      return { success: true };
+    }
+    return { success: false, error: 'User not found' };
+  };
+
+  const getAllBooks = () => {
+    return mockDatabase.books;
+  };
+
+  const addBook = (bookData) => {
+    if (!user || user.role !== 'admin') {
+      throw new Error('Unauthorized');
+    }
+    const newBook = {
+      id: `book${mockDatabase.books.length + 1}`,
+      ...bookData
+    };
+    mockDatabase.books.push(newBook);
+    return { success: true, book: newBook };
+  };
+
+  // USER FUNCTIONS
+  const updateProfile = (profileData) => {
+    if (!user) {
+      throw new Error('Not authenticated');
+    }
+    const updatedUser = { ...user, ...profileData };
+    localStorage.setItem('user', JSON.stringify(updatedUser));
+    setUser(updatedUser);
+    return { success: true, user: updatedUser };
+  };
+
+  const updateReadingProgress = (progress) => {
+    if (!user || user.role !== 'user') {
+      throw new Error('Unauthorized');
+    }
+    const updatedUser = { ...user, readingProgress: progress };
+    localStorage.setItem('user', JSON.stringify(updatedUser));
+    setUser(updatedUser);
+    return { success: true, user: updatedUser };
+  };
+
+  const addReview = (bookId, review) => {
+    if (!user) {
+      throw new Error('Not authenticated');
+    }
+    return { success: true, review };
+  };
+
+  const submitForumPost = (post) => {
+    if (!user) {
+      throw new Error('Not authenticated');
+    }
+    return { success: true, post };
   };
 
   const value = {
-    currentUser,
+    user,
+    loading,
+    error,
+    isAuthenticated: !!user,
+    isAdmin: () => user?.role === 'admin',
+    isUser: () => user?.role === 'user',
+    hasRole: (role) => user?.role === role,
+    hasAnyRole: (roles) => roles.includes(user?.role),
+    
+    // Auth functions
     login,
     register,
     logout,
+    
+    // Admin functions
+    getAllUsers,
+    updateUserRole,
+    deleteUser,
+    getAllBooks,
+    addBook,
+    
+    // User functions
     updateProfile,
-    isAuthenticated: !!currentUser
+    updateReadingProgress,
+    addReview,
+    submitForumPost,
+    setError
   };
 
   return (
@@ -104,4 +235,13 @@ export function AuthProvider({ children }) {
       {!loading && children}
     </AuthContext.Provider>
   );
-} 
+};
+
+// 3. Define and export the useAuth hook
+export const useAuth = () => {
+  const context = useContext(AuthContext);
+  if (!context) {
+    throw new Error('useAuth must be used within an AuthProvider');
+  }
+  return context;
+};

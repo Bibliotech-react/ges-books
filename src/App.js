@@ -16,6 +16,7 @@ import Login from './components/user/Login';
 import SignUp from './components/user/SignUp';
 import Profile from './components/user/Profile';
 import Dashboard from './components/user/Dashboard';
+import ManageUsers from './components/user/ManageUsers';
 
 // Protected Route Component
 const ProtectedRoute = ({ children }) => {
@@ -40,6 +41,7 @@ function App() {
               <Route path="/" element={<Home />} />
               <Route path="/login" element={<Login />} />
               <Route path="/signup" element={<SignUp />} />
+              <Route path="/admin/users" element={<ProtectedRoute requireAdmin={true}><ManageUsers /></ProtectedRoute>} />
               
               {/* Protected Routes */}
               <Route 

@@ -1,35 +1,27 @@
-import React, { useState } from 'react';
-import { Form, Button, Card, Alert, Container, Row, Col } from 'react-bootstrap';
-import { Link, useNavigate } from 'react-router-dom';
+import { useState } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
+import { useNavigate, useLocation,Link} from 'react-router-dom';
+import { Form, Button, Card, Alert, Container,} from 'react-bootstrap';
 
-const Login = () => {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+function Login() {
+  const [email, setEmail] = useState('admin@bibliotech.com');
+  const [password, setPassword] = useState('admin123');
   const [error, setError] = useState('');
-  const [loading, setLoading] = useState(false);
-  const navigate = useNavigate();
   const { login } = useAuth();
+  const navigate = useNavigate();
+  const location = useLocation();
+  const [loading, setLoading] = useState(false);
+
+  const from = location.state?.from?.pathname || '/dashboard';
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
+    setError('');
     try {
-      setError('');
-      setLoading(true);
-      
-      const result = await login(email, password);
-      
-      if (result.success) {
-        navigate('/dashboard');
-      } else {
-        setError(result.error || 'Failed to sign in');
-      }
+      await login(email, password);
+      navigate(from, { replace: true });
     } catch (err) {
-      setError('Failed to sign in. Please check your credentials.');
-      console.error(err);
-    } finally {
-      setLoading(false);
+      setError(err.message || 'Failed to sign in');
     }
   };
 
@@ -76,4 +68,4 @@ const Login = () => {
   );
 };
 
-export default Login; 
+export default Login;
